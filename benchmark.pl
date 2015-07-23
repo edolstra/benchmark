@@ -13,11 +13,13 @@ my $times = 10;
 my $file;
 my $other; # path to other sample set
 my $rtrim = 10;
+my $noout = 0;
 
 GetOptions("times|t=n" => \$times,
            "file|f=s" => \$file,
            "compare|c=s" => \$other,
-           "rtrim=n" =>\$rtrim
+           "rtrim=n" => \$rtrim,
+           "no-out" => \$noout
            #"help" => sub { showHelp() }
     )
     or die("syntax: $0 ...\n");
@@ -32,6 +34,7 @@ if (scalar @ARGV > 0) {
         my $pid = fork();
         if ($pid == 0) {
             close RH;
+            open STDOUT, '>/dev/null' if $noout;
             my $t1 = gettimeofday();
             system("taskset", "-c", "6", @ARGV);
             my $t2 = gettimeofday();
