@@ -20,7 +20,7 @@ stdenv.mkDerivation {
     '';
 
   meta = {
-    maintainers = [ stdenv.lib.maintainers.eelco ];
+    maintainers = [ lib.maintainers.eelco ];
     description = "Run a command multiple times and print CPU/memory statistics";
   };
 }
