@@ -14,12 +14,14 @@ my $file;
 my $other; # path to other sample set
 my $rtrim = 10;
 my $noout = 0;
+my $prepare; # shell code to run before each test run
 
 GetOptions("times|t=n" => \$times,
            "file|f=s" => \$file,
            "compare|c=s" => \$other,
            "rtrim=n" => \$rtrim,
-           "no-out" => \$noout
+           "no-out" => \$noout,
+           "prepare=s" => \$prepare
            #"help" => sub { showHelp() }
     )
     or die("syntax: $0 ...\n");
@@ -30,13 +32,18 @@ if (scalar @ARGV > 0) {
 
     for (my $n = 0; $n < $times; $n++) {
         print STDERR "run $n...\n";
+        if (defined $prepare) {
+            system("/bin/sh", "-c", $prepare) == 0
+                or die "$0: prepare command failed\n";
+        }
         pipe RH, WH;
         my $pid = fork();
         if ($pid == 0) {
             close RH;
             open STDOUT, '>/dev/null' if $noout;
             my $t1 = gettimeofday();
-            system("taskset", "-c", "6", @ARGV);
+            #system("taskset", "-c", "6", @ARGV);
+            system(@ARGV);
             my $t2 = gettimeofday();
             my $usage = getrusage_children;
             $usage->{walltime} = $t2 - $t1;
